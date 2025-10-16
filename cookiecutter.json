@@ -1,0 +1,21 @@
+{
+  "project_name": "My Project",
+  "repo_name": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "module_name": "module_{{ cookiecutter.repo_name.replace('-', '_') }}",
+  "developer_redhat_username": "your-username",
+  "python_version": ["3.11","3.12","3.13"],
+  "project_description": "My first MLOps project",
+  "author": "Anonymous",
+
+  "__prompts__": {
+    "project_name": "Enter the project name (should be your repository name)",
+    "module_name": "Enter the module name you want to use in your project (can only contain letters, numbers, and underscores). MUST NOT be the same as your repo name. Example : summit.",
+    "project_description": "Enter the project description",
+    "python_version": "Enter the Python version (3.13 recommended)",
+    "developer_redhat_username": "Enter your Red Hat Developer username (to push images to your Quay.io account and configure OpenShift access to deploy mlflow)",
+    "author": "Enter the author name"
+  },
+  "_copy_without_render": [
+    ".gitignore"
+  ]
+}

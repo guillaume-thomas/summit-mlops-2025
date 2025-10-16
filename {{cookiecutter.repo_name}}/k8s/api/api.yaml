@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlops-api
+  template:
+    metadata:
+      labels:
+        app: mlops-api
+    spec:
+      containers:
+        - name: mlops-api
+          image: quay.io/{{ cookiecutter.developer_redhat_username }}/summit/api:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "1000Mi"
+              cpu: "200m"
+            requests:
+              memory: "500Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlops-api-service
+spec:
+  selector:
+    app: mlops-api
+  ports:
+    - port: 8080
+      name: http-port
+      targetPort: 8080
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: mlops-api
+spec:
+  to:
+    kind: Service
+    name: mlops-api-service
+    weight: 100
+  port:
+    targetPort: http-port
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None

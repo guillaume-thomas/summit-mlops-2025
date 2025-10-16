@@ -1,0 +1,11 @@
+name: summit-experiment
+
+docker_env:
+  image: quay.io/{{ cookiecutter.developer_redhat_username }}/summit/summit-experiment:latest
+
+entry_points:
+
+    main:
+        parameters:
+            path: str
+        command: "uv -n run -m {{ cookiecutter.module_name }}.training.main --input_data_path {path}"

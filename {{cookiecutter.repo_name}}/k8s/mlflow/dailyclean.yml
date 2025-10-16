@@ -1,0 +1,121 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dailyclean-api
+spec:
+  selector:
+    matchLabels:
+      app: dailyclean-api
+  template:
+    metadata:
+      labels:
+        app: dailyclean-api
+    spec:
+      serviceAccountName: dailyclean
+      containers:
+        - name: dailyclean-api
+          image: axaguildev/dailyclean-api:latest
+          env:
+            - name: SERVICE_JOB_IMAGENAME
+              value: axaguildev/dailyclean-job:latest
+            - name: SERVICE_JOB_SERVICEACCOUNTNAME
+              value: dailyclean
+          resources:
+            limits:
+              memory: "96Mi"
+              cpu: "50m"
+            requests:
+              memory: "96Mi"
+              cpu: "10m"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dailyclean-api
+spec:
+  selector:
+    app: dailyclean-api
+  ports:
+    - port: 8080
+      name: http-port
+      targetPort: 8080
+---
+apiVersion: "route.openshift.io/v1"
+kind: Route
+metadata:
+  name: dailyclean
+spec:
+  host: ""
+  path: ""
+  port:
+    targetPort: 8080
+  tls: null
+  to:
+    kind: Service
+    name: dailyclean-api
+    weight: 100
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dailyclean
+  namespace: {{ cookiecutter.developer_redhat_username }}-dev
+rules:
+  - verbs:
+      - get
+      - list
+      - watch
+      - patch
+    apiGroups:
+      - apps
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+  - verbs:
+      - get
+      - list
+      - watch
+      - patch
+    apiGroups:
+      - extensions
+    resources:
+      - deployments
+      - replicasets
+  - verbs:
+      - get
+      - create
+      - patch
+      - update
+      - delete
+      - list
+      - watch
+    apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dailyclean
+  namespace: {{ cookiecutter.developer_redhat_username }}-dev
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dailyclean
+  namespace: {{ cookiecutter.developer_redhat_username }}-dev
+subjects:
+  - kind: ServiceAccount
+    name: dailyclean
+    namespace: {{ cookiecutter.developer_redhat_username }}-dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dailyclean
+---

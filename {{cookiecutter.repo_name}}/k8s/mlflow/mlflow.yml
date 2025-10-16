@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      securityContext:
+        runAsUser: 1014080000
+        runAsNonRoot: true
+      containers:
+        - name: mlflow
+          image: quay.io/gthomas59800/summit2025/mlflow34py313:latest
+          imagePullPolicy: Always
+          args:
+            - --host=0.0.0.0
+            - --port=8080
+            - --backend-store-uri=mysql+mysqldb://summitmlflow:summitmlops@mysql:3306/mlflow
+            - --default-artifact-root=s3://mlflow/
+            - --workers=2
+          env:
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: http://mlflow-minio-service.{{ cookiecutter.developer_redhat_username }}-dev.svc.cluster.local:9000
+            - name: AWS_ACCESS_KEY_ID
+              value: "minio"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "minio123"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "400m"
+              memory: 1024Mi
+            limits:
+              cpu: "400m"
+              memory: 1024Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+spec:
+  selector:
+    app: mlflow
+  ports:
+    - port: 8080
+      name: http-port
+      targetPort: 8080
+---
+apiVersion: "route.openshift.io/v1"
+kind: Route
+metadata:
+  name: mlflow
+spec:
+  host: ""
+  path: ""
+  port:
+    targetPort: 8080
+  tls: null
+  to:
+    kind: Service
+    name: mlflow
+    weight: 100

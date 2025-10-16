@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      volumes:
+        - name: mlflow-pvc
+          persistentVolumeClaim:
+            claimName: mlflow-pvc
+        - name: minio-initdb
+          configMap:
+            name: minio-initdb-config
+            defaultMode: 0777
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:latest
+          args:
+            - server
+            - --console-address
+            - :9001
+            - /data
+          volumeMounts:
+            - name: mlflow-pvc
+              mountPath: '/data'
+            - name: minio-initdb
+              mountPath: '/init'
+          env:
+            - name: MINIO_ROOT_USER
+              value: "minio"
+            - name: MINIO_ROOT_PASSWORD
+              value: "minio123"
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          resources:
+            requests:
+              cpu: "400m"
+              memory: 2048Mi
+            limits:
+              cpu: "400m"
+              memory: 2048Mi
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c", '/init/init.sh' ]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10000Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minio-initdb-config
+data:
+  init.sh: |
+    echo 'Waiting starting'
+    sleep 10
+    mc alias set minio http://127.0.0.1:9000 minio minio123
+    mc mb minio/mlflow --ignore-existing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-minio-service
+spec:
+  ports:
+    - port: 9000
+      name: s3
+    - port: 9001
+      name: minio-console
+  selector:
+    app: minio
+---
+apiVersion: "route.openshift.io/v1"
+kind: Route
+metadata:
+  name: minio-console
+spec:
+  host: ""
+  path: ""
+  port:
+    targetPort: 9001
+  tls: null
+  to:
+    kind: Service
+    name: mlflow-minio-service
+    weight: 100
+---
+apiVersion: "route.openshift.io/v1"
+kind: Route
+metadata:
+  name: minio-api
+spec:
+  host: ""
+  path: ""
+  port:
+    targetPort: 9000
+  tls: null
+  to:
+    kind: Service
+    name: mlflow-minio-service
+    weight: 100

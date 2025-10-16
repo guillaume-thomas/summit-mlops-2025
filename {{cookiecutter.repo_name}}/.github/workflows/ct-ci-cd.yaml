@@ -1,0 +1,79 @@
+name: summit-ct-ci-cd-pipeline
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.13
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          uv sync --no-group api --group training
+      - name: Configure docker and kubectl
+        run: |
+          docker login -u="{{ "${{" }}vars.QUAY_ROBOT_USERNAME}}" -p="{{ "${{" }}secrets.QUAY_ROBOT_TOKEN}}" quay.io
+          kubectl config set-cluster openshift-cluster --server={{ "${{" }}vars.OPENSHIFT_SERVER}}
+          kubectl config set-credentials openshift-credentials --token={{ "${{" }}secrets.OPENSHIFT_TOKEN}}
+          kubectl config set-context openshift-context --cluster=openshift-cluster --user=openshift-credentials --namespace={{ "${{" }}vars.OPENSHIFT_USERNAME}}-dev
+          kubectl config use openshift-context
+      - name: Wake up dailyclean and kto-mlflow
+        run: |
+          kubectl scale --replicas=1 deployment/dailyclean-api
+          sleep 30
+          curl -X POST {{ "${{" }}vars.DAILYCLEAN_ROUTE}}/pods/start
+      - name: Build training image
+        run: |
+          docker build -f k8s/experiment/Dockerfile -t quay.io/{{ cookiecutter.developer_redhat_username }}/summit/summit-experiment:latest --build-arg MLFLOW_S3_ENDPOINT_URL={{ "${{" }}vars.MLFLOW_S3_ENDPOINT_URL}} --build-arg AWS_ACCESS_KEY_ID={{ "${{" }}vars.AWS_ACCESS_KEY_ID}} --build-arg AWS_SECRET_ACCESS_KEY={{ "${{" }}secrets.AWS_SECRET_ACCESS_KEY}} .
+      - name: Launch mlflow training in Openshift
+        run: |
+          export KUBE_MLFLOW_TRACKING_URI="{{ "${{" }}vars.MLFLOW_TRACKING_URI}}"
+          export MLFLOW_TRACKING_URI="{{ "${{" }}vars.MLFLOW_TRACKING_URI}}"
+          export MLFLOW_S3_ENDPOINT_URL="{{ "${{" }}vars.MLFLOW_S3_ENDPOINT_URL}}"
+          export AWS_ACCESS_KEY_ID="{{ "${{" }}vars.AWS_ACCESS_KEY_ID}}" 
+          export AWS_SECRET_ACCESS_KEY="{{ "${{" }}secrets.AWS_SECRET_ACCESS_KEY}}"
+          export EXPERIMENT_NAME="{{ cookiecutter.module_name }}"
+          
+          uv run mlflow run ./src/{{ cookiecutter.module_name }}/training -P path=data.csv --experiment-name $EXPERIMENT_NAME --backend kubernetes --backend-config ./k8s/experiment/kubernetes_config.json
+          
+          echo "EXPERIMENT_NAME=$EXPERIMENT_NAME" >> "$GITHUB_ENV"
+      - name: Download model artifact
+        run: |
+          export MLFLOW_TRACKING_URI="{{ "${{" }}vars.MLFLOW_TRACKING_URI}}"
+          export MLFLOW_S3_ENDPOINT_URL="{{ "${{" }}vars.MLFLOW_S3_ENDPOINT_URL}}"
+          export AWS_ACCESS_KEY_ID="{{ "${{" }}vars.AWS_ACCESS_KEY_ID}}" 
+          export AWS_SECRET_ACCESS_KEY="{{ "${{" }}secrets.AWS_SECRET_ACCESS_KEY}}"
+          export ARTIFACT_URI=$(uv run -m {{ cookiecutter.module_name }}.ci.search_mlflow --experiment-name $EXPERIMENT_NAME)
+          
+          echo "ARTIFACT_URI=$ARTIFACT_URI"
+          uv run mlflow artifacts download --artifact-uri $ARTIFACT_URI -d ./src/{{ cookiecutter.module_name }}/api/resources/
+          
+          # could be : uv run mlflow artifacts download -r $MLFLOW_RUN_ID -a model.pkl -d ./src/{{ cookiecutter.module_name }}/api/resources/
+      - name: Build and push api image
+        run: |
+          docker build -f k8s/api/Dockerfile -t quay.io/{{ cookiecutter.developer_redhat_username }}/summit/api:latest .
+          docker push quay.io/{{ cookiecutter.developer_redhat_username }}/summit/api:latest
+      - name: Deploy api to Openshift
+        run: |
+          kubectl apply -f k8s/api/api.yaml
+      - name: Test api
+        run: |
+          sleep 30
+          curl -X POST {{ "${{" }}vars.API_ROUTE}}/infer -H "Content-Type: application/json" -d '{"A": 1, "B": 2, "C": 3}'
+      - name: Asleep kto-mlflow with dailyclean
+        run: |
+          curl -X POST {{ "${{" }}vars.DAILYCLEAN_ROUTE}}/pods/stop
+      - name: Scale down dailyclean
+        run: |
+          kubectl scale --replicas=0 deployment/dailyclean-api
