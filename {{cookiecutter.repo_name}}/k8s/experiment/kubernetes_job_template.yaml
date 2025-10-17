@@ -20,6 +20,3 @@ spec:
               cpu: 1300m
               memory: 4000Mi
       restartPolicy: Never
-      securityContext:
-        runAsUser: 1014080000
-        runAsNonRoot: true

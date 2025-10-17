@@ -12,9 +12,6 @@ spec:
       labels:
         app: mlflow
     spec:
-      securityContext:
-        runAsUser: 1014080000
-        runAsNonRoot: true
       containers:
         - name: mlflow
           image: quay.io/gthomas59800/summit2025/mlflow34py313:latest

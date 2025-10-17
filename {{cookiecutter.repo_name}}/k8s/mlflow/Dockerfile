@@ -1,7 +1,5 @@
 FROM python:3.13-slim
 
-ARG USER_UID=1014080000
-
 RUN apt-get update -y && apt-get install -y \
     default-libmysqlclient-dev \
     build-essential \
@@ -13,19 +11,16 @@ RUN apt-get update -y && apt-get install -y \
     gcc \
     && apt-get clean
 
-RUN pip install mlflow[extras]
+RUN pip install mlflow[extras]==3.4.0
 RUN pip install mysqlclient
 RUN pip install boto3
 
 EXPOSE 8080
 
-RUN useradd -u ${USER_UID} -m appuser
-RUN mkdir -p /app
-RUN mkdir -p /app/mlruns
-RUN chmod -R 777 /app
-
 WORKDIR /app
 
-USER ${USER_UID}
+RUN chmod -R 777 /app
+
+USER 1001
 
 ENTRYPOINT ["mlflow", "server"]
