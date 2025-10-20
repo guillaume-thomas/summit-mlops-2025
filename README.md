@@ -42,9 +42,9 @@ cookiecutter https://github.com/guillaume-thomas/summit-mlops-2025
 ![019.png](assets/019.png)
 - First, when asked for the project name, enter the name of your new empty repository in your Github account (noted above).
 - Then, enter a valid python package name (no dash, no space, only letters, numbers and underscores, starting with a letter or an underscore). Should be "summit". MUST NOT BE THE SAME AS YOUR REPOSITORY NAME.
-- Then, enter a short description of your project.
-- Then, enter the python version you want to use => 3.13 is recommended.
 - Then, enter your RedHat Sandbox name when asked. It should be the name you noted above (your namespace name, without "-dev").
+- Then, enter the python version you want to use => 3.13 is recommended.
+- Then, enter a short description of your project.
 - Finally, enter your name
 ![020.png](assets/020.png)
 Now, you can see that a new directory with your project name has been created in your current directory. Change to this new directory:

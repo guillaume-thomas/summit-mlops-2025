@@ -2,7 +2,7 @@
   "project_name": "My Project",
   "repo_name": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
   "module_name": "module_{{ cookiecutter.repo_name.replace('-', '_') }}",
-  "developer_redhat_username": "{{ cookiecutter.developer_redhat_username }}",
+  "developer_redhat_username": "your-openshift-sandbox-name",
   "python_version": ["3.11","3.12","3.13"],
   "project_description": "My first MLOps project",
   "author": "Anonymous",
