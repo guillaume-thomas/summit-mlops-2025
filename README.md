@@ -12,7 +12,7 @@ Here's how to get started!
 ![002.png](assets/002.png)
 ![003.png](assets/003.png)
 - Create an account on [Developers RedHat](https://developers.redhat.com/) if you do not have one.
-- Start your free RedHat Sandbox [here](https://www.sandbox.redhat.com). It will last 30 days and you can renew it.
+- Start your free RedHat Sandbox [here](https://sandbox.redhat.com). It will last 30 days and you can renew it.
 ![004.png](assets/004.png)
 - First, open Openshift Web Console from your RedHat Sandbox and note your sandbox name.
 ![005.png](assets/005.png)
@@ -28,7 +28,7 @@ pip install uv cookiecutter
 ```
 ![011.png](assets/011.png)
 ![012.png](assets/012.png)
-- Then, create a new MLOps project with. You will need to create a new Personal Access Token in your Github account with repo and worklow rights to be able to push your project to your new repository.
+- Then, create a new MLOps project with cookiecutter. You will need to create a new Personal Access Token in your Github account with repo and worklow rights to be able to push your project to your new repository.
 ![013.png](assets/013.png)
 ![014.png](assets/014.png)
 ![015.png](assets/015.png)
