@@ -35,7 +35,7 @@ jobs:
           curl -X POST {{ "${{" }}vars.DAILYCLEAN_ROUTE}}/pods/start
       - name: Build training image
         run: |
-          docker build -f k8s/experiment/Dockerfile -t quay.io/{{ cookiecutter.developer_redhat_username }}/summit/summit-experiment:latest --build-arg MLFLOW_S3_ENDPOINT_URL={{ "${{" }}vars.MLFLOW_S3_ENDPOINT_URL}} --build-arg AWS_ACCESS_KEY_ID={{ "${{" }}vars.AWS_ACCESS_KEY_ID}} --build-arg AWS_SECRET_ACCESS_KEY={{ "${{" }}secrets.AWS_SECRET_ACCESS_KEY}} .
+          docker build -f k8s/experiment/Dockerfile -t quay.io/{{ cookiecutter.quay_username }}/summit/summit-experiment:latest --build-arg MLFLOW_S3_ENDPOINT_URL={{ "${{" }}vars.MLFLOW_S3_ENDPOINT_URL}} --build-arg AWS_ACCESS_KEY_ID={{ "${{" }}vars.AWS_ACCESS_KEY_ID}} --build-arg AWS_SECRET_ACCESS_KEY={{ "${{" }}secrets.AWS_SECRET_ACCESS_KEY}} .
       - name: Launch mlflow training in Openshift
         run: |
           export KUBE_MLFLOW_TRACKING_URI="{{ "${{" }}vars.MLFLOW_TRACKING_URI}}"
@@ -62,8 +62,8 @@ jobs:
           # could be : uv run mlflow artifacts download -r $MLFLOW_RUN_ID -a model.pkl -d ./src/{{ cookiecutter.module_name }}/api/resources/
       - name: Build and push api image
         run: |
-          docker build -f k8s/api/Dockerfile -t quay.io/{{ cookiecutter.developer_redhat_username }}/summit/api:latest .
-          docker push quay.io/{{ cookiecutter.developer_redhat_username }}/summit/api:latest
+          docker build -f k8s/api/Dockerfile -t quay.io/{{ cookiecutter.quay_username }}/summit/api:latest .
+          docker push quay.io/{{ cookiecutter.quay_username }}/summit/api:latest
       - name: Deploy api to Openshift
         run: |
           kubectl apply -f k8s/api/api.yaml

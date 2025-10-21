@@ -1,7 +1,7 @@
 name: summit-experiment
 
 docker_env:
-  image: quay.io/{{ cookiecutter.developer_redhat_username }}/summit/summit-experiment:latest
+  image: quay.io/{{ cookiecutter.quay_username }}/summit/summit-experiment:latest
 
 entry_points:
 

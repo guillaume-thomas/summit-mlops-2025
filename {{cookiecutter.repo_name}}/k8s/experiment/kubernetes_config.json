@@ -1,5 +1,5 @@
 {
   "kube-context": "openshift-context",
   "kube-job-template-path": "./k8s/experiment/kubernetes_job_template.yaml",
-  "repository-uri": "quay.io/{{ cookiecutter.developer_redhat_username }}/summit/summit-experiment"
+  "repository-uri": "quay.io/{{ cookiecutter.quay_username }}/summit/summit-experiment"
 }

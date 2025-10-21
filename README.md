@@ -28,7 +28,37 @@ pip install uv cookiecutter
 ```
 ![011.png](assets/011.png)
 ![012.png](assets/012.png)
-- Then, create a new MLOps project with cookiecutter. You will need to create a new Personal Access Token in your Github account with repo and worklow rights to be able to push your project to your new repository.
+
+## Create your quay repositories
+
+Connect to [quay.io](https://quay.io/) with your Developer RedHat account and create two new public repositories:
+- `<your_username>/summit/summit-experiment`
+- `<your_username>/summit/api`
+  ![039.png](assets/039.png)
+  ![040.png](assets/040.png)
+  ![041.png](assets/041.png)
+  ![043.png](assets/043.png)
+  ![044.png](assets/044.png)
+  ![045.png](assets/045.png)
+
+In order to be able to push your images to your quay repositories, you need to create a new robot account in your quay organization. To do so:
+- Go to your quay organization (your username) and click on "Account Settings"
+  ![046.png](assets/046.png)
+- Click on "Robot Accounts" in the left menu
+- Click on "Create Robot Account"
+  ![047.png](assets/047.png)
+- Enter a name for your robot account (e.g. `summit_bot`)
+  ![048.png](assets/048.png)
+- Select "Admin" permissions for your two new repositories
+  ![049.png](assets/049.png)
+- Click on "Create Robot Account"
+- Note the robot account name (e.g. `summit_bot+robot`) and the token. You will need them later.
+  ![050.png](assets/050.png)
+  ![051.png](assets/051.png)
+
+## Create your MLOps project with cookiecutter
+Now, you will create a new MLOps project with cookiecutter. 
+- First, you will need to create a new Personal Access Token in your Github account with repo and worklow rights to be able to push your project to your new repository.
 ![013.png](assets/013.png)
 ![014.png](assets/014.png)
 ![015.png](assets/015.png)
@@ -43,13 +73,16 @@ cookiecutter https://github.com/guillaume-thomas/summit-mlops-2025
 - First, when asked for the project name, enter the name of your new empty repository in your Github account (noted above).
 - Then, enter a valid python package name (no dash, no space, only letters, numbers and underscores, starting with a letter or an underscore). Should be "summit". MUST NOT BE THE SAME AS YOUR REPOSITORY NAME.
 - Then, enter your RedHat Sandbox name when asked. It should be the name you noted above (your namespace name, without "-dev").
+![006.png](assets/006.png)
+- Then, enter your quay.io username when asked.
+![100.png](assets/100.png)
 - Then, enter the python version you want to use => 3.13 is recommended.
 - Then, enter a short description of your project.
 - Finally, enter your name
 ![020.png](assets/020.png)
 Now, you can see that a new directory with your project name has been created in your current directory. Change to this new directory:
 ```bash
-cd <your project name>
+cd /projects/<your project name>
 ```
 
 You can open the project it in your Visual Studio Code in your RedHat DevSpaces.
@@ -112,8 +145,8 @@ chmod -R 777 scripts
 ./scripts/install-mlflow.sh
 ```
 
-See in your Openshift Web Console that all the necessary resources (PVC, Deployment, Service, Route, ...) have been created.
 ![029.png](assets/029.png)
+See in your Openshift Web Console that all the necessary resources (PVC, Deployment, Service, Route, ...) have been created.
 ![030.png](assets/030.png)
 
 Please note that the mlflow server is not secured. It is only for demo purposes.
@@ -132,34 +165,6 @@ You can use the minio console to upload your data. To do so:
 ![036.png](assets/036.png)
 ![037.png](assets/037.png)
 ![038.png](assets/038.png)
-
-## Create your quay repositories
-
-Connect to [quay.io](https://quay.io/) with your Developer RedHat account and create two new public repositories:
-- `<your_username>/summit/summit-experiment`
-- `<your_username>/summit/api`
-![039.png](assets/039.png)
-![040.png](assets/040.png)
-![041.png](assets/041.png)
-![042.png](assets/042.png)
-![043.png](assets/043.png)
-![044.png](assets/044.png)
-![045.png](assets/045.png)
-
-In order to be able to push your images to your quay repositories, you need to create a new robot account in your quay organization. To do so:
-- Go to your quay organization (your username) and click on "Account Settings"
-![046.png](assets/046.png)
-- Click on "Robot Accounts" in the left menu
-- Click on "Create Robot Account"
-![047.png](assets/047.png)
-- Enter a name for your robot account (e.g. `summit_bot`)
-![048.png](assets/048.png)
-- Select "Admin" permissions for your two new repositories
-![049.png](assets/049.png)
-- Click on "Create Robot Account"
-- Note the robot account name (e.g. `summit_bot+robot`) and the token. You will need them later.
-![050.png](assets/050.png)
-![051.png](assets/051.png)
 
 ## Set your environment variables in your Github repository
 
@@ -183,10 +188,10 @@ It is nearly finished! You just need to set a few environment variables in your 
 - Click on the Variables tab and then on "New repository variable"
 ![060.png](assets/060.png)
 - Create the following variables: 
-  - `API_ROUTE`: the route of your api. It should be something like `https://mlops-api-<your_sandbox_name>-dev.apps.<your_sandbox_cluster:rm3.7wse.p1>.openshiftapps.com`. It should not exist yet. Do not forget httpS !!!
-![061.png](assets/061.png)
-  - `AWS_ACCESS_KEY_ID`: the access key of your minio server. It is `minio` by default
   - `DAILYCLEAN_ROUTE`: the route of your dailyclean service. It should be something like `http://dailyclean-<your_sandbox_name>-dev.apps.<your_sandbox_cluster:rm3.7wse.p1>.openshiftapps.com`. You can find it in your Openshift Web Console under "Routes".
+![061.png](assets/061.png)
+  - `API_ROUTE`: the route of your api. It should not exist yet. You can create it from your dailyclean route : change `dailycean` by `mlops-api` and change `http` to `https`. It should be something like `https://mlops-api-<your_sandbox_name>-dev.apps.<your_sandbox_cluster:rm3.7wse.p1>.openshiftapps.com`. Do not forget httpS and please, do not let a slash at the end of your URL !!!
+  - `AWS_ACCESS_KEY_ID`: the access key of your minio server. It is `minio` by default
   - `MLFLOW_S3_ENDPOINT_URL`: the S3 (minio) endpoint URL of your mlflow server. It should be something like `http://minio-api-<your_sandbox_name>-dev.apps.<your_sandbox_cluster:rm3.7wse.p1>.openshiftapps.com`. You can find it in your Openshift Web Console under "Routes". BE WARNED ! USE minio-api NOT minio-console
   - `MLFLOW_TRACKING_URI`: the URL of your mlflow server. You can find it in your Openshift Web Console under "Routes". It should be something like `http://mlflow-<your_sandbox_name>-dev.apps.<your_sandbox_cluster:rm3.7wse.p1>.openshiftapps.com`
   - `OPENSHIFT_SERVER`: the API server of your RedHat Openshift Sandbox. You can find it in your Openshift Web Console under "Copy Login Command". It should be something like `https://api.<your_sandbox_cluster:rm3.7wse.p1>:6443`
