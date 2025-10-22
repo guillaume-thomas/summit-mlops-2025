@@ -28,7 +28,7 @@ jobs:
           kubectl config set-credentials openshift-credentials --token={{ "${{" }}secrets.OPENSHIFT_TOKEN}}
           kubectl config set-context openshift-context --cluster=openshift-cluster --user=openshift-credentials --namespace={{ "${{" }}vars.OPENSHIFT_USERNAME}}-dev
           kubectl config use openshift-context
-      - name: Wake up dailyclean and kto-mlflow
+      - name: Wake up dailyclean and mlflow
         run: |
           kubectl scale --replicas=1 deployment/dailyclean-api
           sleep 30
@@ -71,7 +71,7 @@ jobs:
         run: |
           sleep 30
           curl -X POST {{ "${{" }}vars.API_ROUTE}}/infer -H "Content-Type: application/json" -d '{"A": 1, "B": 2, "C": 3}'
-      - name: Asleep kto-mlflow with dailyclean
+      - name: Asleep mlflow with dailyclean
         run: |
           curl -X POST {{ "${{" }}vars.DAILYCLEAN_ROUTE}}/pods/stop
       - name: Scale down dailyclean

@@ -51,7 +51,8 @@ In order to be able to push your images to your quay repositories, you need to c
   ![048.png](assets/048.png)
 - Select "Admin" permissions for your two new repositories
   ![049.png](assets/049.png)
-- Click on "Create Robot Account"
+- Click on "Add permissions"
+- Finally, click on your new robot account to get its token.
 - Note the robot account name (e.g. `summit_bot+robot`) and the token. You will need them later.
   ![050.png](assets/050.png)
   ![051.png](assets/051.png)
@@ -210,6 +211,16 @@ It is nearly finished! You just need to set a few environment variables in your 
 ![068.png](assets/068.png)
 ![069.png](assets/069.png)
 ![070.png](assets/070.png)
+
+NOW, YOU'RE ALL SET :) ENJOY MLOPS ON REDHAT OPENSHIFT SANDBOX !!!!!!!
+
+## Test your API
+
+First, do not forget to use Dailyclean to awake or asleep your mlflow server and your api to avoid sandbox resource limits.
+
+By default, your github action shutdown all your pods, Dailyclean include. So to test your API or play with your mlflow environment :
+- Start Dailyclean by setting up the number of the Dailyclean Deployment replicas to 1 in your Openshift Web Console.
+- Then, start all your pods with the Dailyclean front application. To do so, open Dailyclean route in your browser and click on "On" and "Submit". More information about Dailyclean [here](https://github.com/AxaFrance/dailyclean)
 - Finally, test your api by calling the health endpoint. You can use curl or Bruno or even your browser. The api route is the one you set in the `API_ROUTE` variable above.
 ```bash
 curl -X GET <your_api_route>/health
@@ -217,6 +228,4 @@ curl -X GET <your_api_route>/health
 It should return `{"status":"ok"}`.
 ![071.png](assets/071.png)
 
-NOW, YOU'RE ALL SET :) ENJOY MLOPS ON REDHAT OPENSHIFT SANDBOX !!!!!!!
-
-Do not forget to use Dailyclean to awake or asleep your mlflow server and your api to avoid sandbox resource limits.
+You can also test your webservice with the openapi documentation available at `<your_api_route>/docs`.

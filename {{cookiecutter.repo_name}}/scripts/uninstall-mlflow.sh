@@ -1,4 +1,4 @@
-echo Uninstall kto-mlflow
+echo Uninstall summit-mlflow
 oc delete -f k8s/mlflow/minio.yml
 oc delete -f k8s/mlflow/mysql.yml
 oc delete -f k8s/mlflow/mlflow.yml
