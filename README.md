@@ -229,3 +229,29 @@ It should return `{"status":"ok"}`.
 ![071.png](assets/071.png)
 
 You can also test your webservice with the openapi documentation available at `<your_api_route>/docs`.
+
+## To go further, create your own ML project! And a real one this time :)
+
+In this section, you will create your own ML project using the MLOps structure created with cookiecutter, with your own github actions and your mlflow environment on OpenShift.
+
+To do so, we propose you to follow this Kaggle : [Titanic - Machine Learning from Disaster](https://www.kaggle.com/competitions/titanic/overview)
+
+To help you, we add the dataset in the `data` directory of your project. It is the file `all_titanic.csv`.
+
+Do not forget to first add this file to your minio server in the `summit` bucket as explained above.
+
+Then, you can change the code in the src/your_package_name/training directory to adapt your ML project.
+
+We will use a simple RandomForestClassifier for this example. It could be interesting to add some parameters to tune in the model in your MLProject.
+
+When your training code is ready, you can update the api code, and your github action.
+
+When you are done, commit and push your changes to your Github repository. It will trigger automatically the github actions to build and deploy your api with your new model.
+
+You will find a solution in this commit : [Solution commit](https://github.com/guillaume-thomas/mlops-template/commit/8cb403700fd9dcf480e087ea12f7a49518e9c7b1)
+
+## It misses unit tests! And monitoring!
+
+And you are so right! This is left as an exercise for the reader :)
+
+To monitor, you can use Prometheus and Grafana on OpenShift. You can find a lot of tutorials on the web to do so.
