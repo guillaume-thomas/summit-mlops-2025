@@ -5,6 +5,14 @@ It allows you also to deploy a simple mlflow server with a backend and a file st
 
 Here's how to get started!
 
+## Quick Introduction
+
+[Introduction Deck](presentation/Summit_2025_-_Workshop_MLOPS.pptx)
+
+## Architecture
+
+![summit_mlops_2025_archi.png](assets/summit_mlops_2025_archi.png)
+
 ## Prerequisites
 - Create a Github account if you don't have one.
 - Create a new public repository in your Github account. Keep it empty for now and note your repository name.
